@@ -528,34 +528,24 @@ export class Helios {
 	 * 
 	 */
 	_callEventFromPickID(pickID, eventType, event) {
-        let pickObject = null;
-        let isNode = true;
-        if (pickID >= 0) {
-            let nodePick = null;
-            // first check for nodes
-            if (pickID < this.network.nodeCount) {
-                isNode = true;
-                nodePick = this.network.index2Node[pickID];
-            }
-            
-            // only select edge if there is not a node
-            if (!nodePick && pickID >= this.network.nodeCount) {
-                let edgeIndex = pickID - this.network.nodeCount;
-                if (edgeIndex < this.network.indexedEdges.length / 2) {
-                    let edge = {
-                        "source": this.network.index2Node[this.network.indexedEdges[2 * edgeIndex]],
-                        "target": this.network.index2Node[this.network.indexedEdges[2 * edgeIndex + 1]],
-                        "index": edgeIndex
-                    }
-                    isNode = false;
-                    pickObject = edge;
-                }
-            }
-
-            if (nodePick) {
-                isNode = true;
-                pickObject = nodePick;
-            }
+		let pickObject = null;
+		let isNode = true;
+		if (pickID >= 0) {
+			if (pickID < this.network.nodeCount) {
+				isNode = true;
+				pickObject = this.network.index2Node[pickID];
+			} else if (pickID >= this.network.nodeCount) {
+				let edgeIndex = pickID - this.network.nodeCount;
+				if (edgeIndex < this.network.indexedEdges.length / 2) {
+					let edge = {
+						"source": this.network.index2Node[this.network.indexedEdges[2 * edgeIndex]],
+						"target": this.network.index2Node[this.network.indexedEdges[2 * edgeIndex + 1]],
+						"index": edgeIndex
+					}
+					isNode = false;
+					pickObject = edge;
+				}
+			}
 		}
 		// if(eventType!="hoverMove"){
 		// 	console.log({
