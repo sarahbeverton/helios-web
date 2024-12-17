@@ -687,8 +687,20 @@ export class Helios {
 		this._hoverMoveEventListener = (event) => {
 			this.lastMouseX = event.clientX;
 			this.lastMouseY = event.clientY;
-			this.triggerHoverEvents(event);
+		
+			const rect = this.canvasElement.getBoundingClientRect();
+			const pickID = this.pickPoint(this.lastMouseX - rect.left, this.lastMouseY - rect.top);
+		
+			// Prioritize nodes for hover events
+			if (pickID >= 0) {
+				this._callEventFromPickID(pickID, "hoverMove", event);
+			} else {
+				// If no node or edge is found, trigger hover events with null
+				this.onNodeHoverMoveCallback?.(null, event);
+				this.onEdgeHoverMoveCallback?.(null, event);
+			}
 		};
+		
 
 		this._hoverLeaveEventListener = (event) => {
 			if (this.currentHoverIndex >= 0) {
