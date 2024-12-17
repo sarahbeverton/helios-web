@@ -8709,7 +8709,9 @@ class jl {
       const r = this.pickPoint(this.lastMouseX - n.left, this.lastMouseY - n.top);
       r >= 0 ? this._callEventFromPickID(r, "doubleClick", e) : (this.onNodeDoubleClickCallback?.(null, e), this.onEdgeDoubleClickCallback?.(null, e));
     }, this._hoverMoveEventListener = (e) => {
-      this.lastMouseX = e.clientX, this.lastMouseY = e.clientY, this.triggerHoverEvents(e);
+      this.lastMouseX = e.clientX, this.lastMouseY = e.clientY;
+      const n = this.canvasElement.getBoundingClientRect(), r = this.pickPoint(this.lastMouseX - n.left, this.lastMouseY - n.top);
+      r >= 0 ? this._callEventFromPickID(r, "hoverMove", e) : (this.onNodeHoverMoveCallback?.(null, e), this.onEdgeHoverMoveCallback?.(null, e));
     }, this._hoverLeaveEventListener = (e) => {
       this.currentHoverIndex >= 0 && (this._callEventFromPickID(this.currentHoverIndex, "hoverEnd", e), this.currentHoverIndex = -1, this.lastMouseX = -1, this.lastMouseY = -1);
     }, this._hoverLeaveWindowEventListener = (e) => {
