@@ -8639,19 +8639,19 @@ class jl {
   _callEventFromPickID(e, n, r) {
     let i = null, a = !0;
     if (e >= 0) {
-      if (e < this.network.nodeCount)
-        a = !0, i = this.network.index2Node[e];
-      else if (e >= this.network.nodeCount) {
-        let o = e - this.network.nodeCount;
-        if (o < this.network.indexedEdges.length / 2) {
-          let s = {
-            source: this.network.index2Node[this.network.indexedEdges[2 * o]],
-            target: this.network.index2Node[this.network.indexedEdges[2 * o + 1]],
-            index: o
+      let o = null;
+      if (e < this.network.nodeCount && (a = !0, o = this.network.index2Node[e]), !o && e >= this.network.nodeCount) {
+        let s = e - this.network.nodeCount;
+        if (s < this.network.indexedEdges.length / 2) {
+          let h = {
+            source: this.network.index2Node[this.network.indexedEdges[2 * s]],
+            target: this.network.index2Node[this.network.indexedEdges[2 * s + 1]],
+            index: s
           };
-          a = !1, i = s;
+          a = !1, i = h;
         }
       }
+      o && (a = !0, i = o);
     }
     if (i)
       switch (n) {
