@@ -2297,7 +2297,10 @@ export class Helios {
 			// if(edge)
 			if (framebufferType != "tracking") {
 				if (this._edgesGlobalOpacityScale > 0.0) {
+					gl.enable(gl.POLYGON_OFFSET_FILL);
+					gl.polygonOffset(3.0, 3.0);
 					this._redrawEdges(destination, framebufferType);
+					gl.disable(gl.POLYGON_OFFSET_FILL);
 				}
 			}
 			this._redrawNodes(destination, framebufferType);
@@ -2308,7 +2311,10 @@ export class Helios {
 
 			if (framebufferType != "tracking") {
 				if (this._edgesGlobalOpacityScale > 0.0) {
+					gl.enable(gl.POLYGON_OFFSET_FILL);
+					gl.polygonOffset(3.0, 3.0);
 					this._redrawEdges(destination, framebufferType);
+					gl.disable(gl.POLYGON_OFFSET_FILL);
 				}
 			}
 			gl.depthMask(true);
@@ -3521,19 +3527,37 @@ export class Helios {
 		const pixelY = Math.round(fbHeight - y * fbHeight / this.canvasElement.clientHeight - 0.5);
 		const data = new Uint8Array(4);
 		const gl = this.gl;
+	
+		// Helper function to read the ID
+		const readID = () => {
+			gl.readPixels(
+				pixelX,            // x
+				pixelY,            // y
+				1,                 // width
+				1,                 // height
+				gl.RGBA,           // format
+				gl.UNSIGNED_BYTE,  // type
+				data);             // typed array to hold result
+			return (data[0] + (data[1] << 8) + (data[2] << 16) + (data[3] << 24)) - 1;
+		};
+	
+		// Bind the framebuffer for picking
 		gl.bindFramebuffer(gl.FRAMEBUFFER, this.pickingFramebuffer);
-		gl.readPixels(
-			pixelX,            // x
-			pixelY,            // y
-			1,                 // width
-			1,                 // height
-			gl.RGBA,           // format
-			gl.UNSIGNED_BYTE,  // type
-			data);             // typed array to hold result
-		const ID = (data[0] + (data[1] << 8) + (data[2] << 16) + (data[3] << 24)) - 1;
-		return ID;
-	}
+	
+		const ID = readID();
+		if (ID >= 0) {
+			// it is a node or edge
+			if (ID < this.network.nodeCount) {
+				return ID; // Node
+			} else if (ID <= this.network.nodeCount) {
+				return ID; // Edge
+			}
+		}
+		
+		return -1; // Nothing picked
 
+	}
+	
 
 	_consolidateCentroids(centroids, counts) {
 		for (const [nodeAttribute, centroid] of centroids) {

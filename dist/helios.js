@@ -9399,7 +9399,7 @@ class jl {
   _redrawAll(e, n) {
     typeof n > "u" && (n = "normal");
     const r = this.gl;
-    this._redrawPrepare(e, n), n == "normal" && this.densityPlot && (r.disable(this.gl.DEPTH_TEST), e?.size.width || this.canvasElement.width, e?.size.height || this.canvasElement.height, this.densityMap.drawScene(this.projectionMatrix, this.viewMatrix)), r.depthMask(!0), this._use2D ? (r.disable(r.DEPTH_TEST), r.depthMask(!1), n != "tracking" && this._edgesGlobalOpacityScale > 0 && this._redrawEdges(e, n), this._redrawNodes(e, n)) : (r.enable(r.DEPTH_TEST), this._redrawNodes(e, n), r.depthMask(!1), n != "tracking" && this._edgesGlobalOpacityScale > 0 && this._redrawEdges(e, n), r.depthMask(!0));
+    this._redrawPrepare(e, n), n == "normal" && this.densityPlot && (r.disable(this.gl.DEPTH_TEST), e?.size.width || this.canvasElement.width, e?.size.height || this.canvasElement.height, this.densityMap.drawScene(this.projectionMatrix, this.viewMatrix)), r.depthMask(!0), this._use2D ? (r.disable(r.DEPTH_TEST), r.depthMask(!1), n != "tracking" && this._edgesGlobalOpacityScale > 0 && (r.enable(r.POLYGON_OFFSET_FILL), r.polygonOffset(3, 3), this._redrawEdges(e, n), r.disable(r.POLYGON_OFFSET_FILL)), this._redrawNodes(e, n)) : (r.enable(r.DEPTH_TEST), this._redrawNodes(e, n), r.depthMask(!1), n != "tracking" && this._edgesGlobalOpacityScale > 0 && (r.enable(r.POLYGON_OFFSET_FILL), r.polygonOffset(3, 3), this._redrawEdges(e, n), r.disable(r.POLYGON_OFFSET_FILL)), r.depthMask(!0));
   }
   // onResizeCallback
   // onNodeClickCallback
@@ -10231,8 +10231,7 @@ class jl {
    * }
    */
   pickPoint(e, n) {
-    const r = this.canvasElement.width * this.pickingResolutionRatio, i = this.canvasElement.height * this.pickingResolutionRatio, a = Math.round(e * r / this.canvasElement.clientWidth - 0.5), o = Math.round(i - n * i / this.canvasElement.clientHeight - 0.5), s = new Uint8Array(4), h = this.gl;
-    return h.bindFramebuffer(h.FRAMEBUFFER, this.pickingFramebuffer), h.readPixels(
+    const r = this.canvasElement.width * this.pickingResolutionRatio, i = this.canvasElement.height * this.pickingResolutionRatio, a = Math.round(e * r / this.canvasElement.clientWidth - 0.5), o = Math.round(i - n * i / this.canvasElement.clientHeight - 0.5), s = new Uint8Array(4), h = this.gl, u = () => (h.readPixels(
       a,
       // x
       o,
@@ -10246,7 +10245,16 @@ class jl {
       h.UNSIGNED_BYTE,
       // type
       s
-    ), s[0] + (s[1] << 8) + (s[2] << 16) + (s[3] << 24) - 1;
+    ), s[0] + (s[1] << 8) + (s[2] << 16) + (s[3] << 24) - 1);
+    h.bindFramebuffer(h.FRAMEBUFFER, this.pickingFramebuffer);
+    const l = u();
+    if (l >= 0) {
+      if (l < this.network.nodeCount)
+        return l;
+      if (l <= this.network.nodeCount)
+        return l;
+    }
+    return -1;
   }
   _consolidateCentroids(e, n) {
     for (const [r, i] of e) {
