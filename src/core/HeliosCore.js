@@ -2291,33 +2291,31 @@ export class Helios {
 		}
 
 		gl.depthMask(true);
+
 		if (this._use2D) {
 			gl.disable(gl.DEPTH_TEST);
 			gl.depthMask(false);
-			// if(edge)
-			if (framebufferType != "tracking") {
-				if (this._edgesGlobalOpacityScale > 0.0) {
-					gl.enable(gl.POLYGON_OFFSET_FILL);
-					gl.polygonOffset(3.0, 3.0);
-					this._redrawEdges(destination, framebufferType);
-					gl.disable(gl.POLYGON_OFFSET_FILL);
-				}
+		
+			if (framebufferType != "tracking" && this._edgesGlobalOpacityScale > 0.0) {
+				this._redrawEdges(destination, framebufferType);
 			}
+		
 			this._redrawNodes(destination, framebufferType);
 		} else {
 			gl.enable(gl.DEPTH_TEST);
+			gl.depthFunc(gl.LEQUAL);
+		
 			this._redrawNodes(destination, framebufferType);
-			gl.depthMask(false);
-
-			if (framebufferType != "tracking") {
-				if (this._edgesGlobalOpacityScale > 0.0) {
-					gl.enable(gl.POLYGON_OFFSET_FILL);
-					gl.polygonOffset(3.0, 3.0);
-					this._redrawEdges(destination, framebufferType);
-					gl.disable(gl.POLYGON_OFFSET_FILL);
-				}
+		
+			gl.depthFunc(gl.ALWAYS);
+			gl.depthMask(false); // Prevent depth buffer writes for edges
+		
+			if (framebufferType != "tracking" && this._edgesGlobalOpacityScale > 0.0) {
+				this._redrawEdges(destination, framebufferType);
 			}
+		
 			gl.depthMask(true);
+			gl.depthFunc(gl.LEQUAL);
 		}
 	}
 
